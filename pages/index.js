@@ -2,16 +2,46 @@ import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/Home.module.css";
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { MList } from "./MList";
-import list from './movieList.json';
+
+// uncomment to use json file
+//import list from './movieList.json';
 
 export default function Home() {
   const [movieName, setMovieName] = useState(null);
   const [movieInfo, setMovieInfo] = useState(null);
 
-  let details = JSON.parse(JSON.stringify(list));
+  const [films, setFilms] = useState([]);
+
+  //for own API
+  const fetchFilmDetails = () =>{
+    try {
+      axios
+        .get("http://127.0.0.1:3000/movie/all",{
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          }
+        })
+        .then((response) => {
+          let result =JSON.parse(JSON.stringify(response));
+          let {data} = result
+          //console.log(data)
+          setFilms(data);
+          
+        });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  useEffect(()=>{
+    fetchFilmDetails();
+  },[])
+
+  //for using json
+  //let details = JSON.parse(JSON.stringify(list));
 
   const fetchMovieInfo = () => {
     try {
@@ -44,7 +74,7 @@ export default function Home() {
         </button>
       </div>
       <div>
-        {movieInfo ?<MList details={movieInfo}/>:<MList details={list} />}
+        {movieInfo ?<MList details={movieInfo}/>:<MList details={films} />}
       </div>
       
     </div>
